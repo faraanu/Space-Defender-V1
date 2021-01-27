@@ -1,0 +1,115 @@
+<html>
+
+<head>
+	<title>
+		Space Defender
+	</title>
+	<link rel="stylesheet" href="../../styles.css">
+	<script src="main.js"></script>
+</head>
+
+<body>
+
+	<!-- 
+			Title 
+	-->
+
+	<h1 style="text-align: center; font-size: 60px;">SPACE DEFENDER</h1>
+
+	<!-- 
+			Written Game Explanation 
+	-->
+
+	<h2>HOW TO PLAY</h2>
+	<p>
+		Space defender is a space game where you have to shoot enemy ships that spawn randomly with your ship.
+		<br> You have HEALTH and POWER.
+		<br> You loose X ammount of health depending on what sort of enemy you collide with or if an enemy bullet hits you.
+		<br> Your POWER increaces constantly (with a 100 power limit when you start). You require POWER to shoot bullets from your ship. Different bullets require different ammounts of power. As you get to higher waves, you can store more power (300 MAX).
+		<br>
+
+		<br>
+		<b>Controls:</b>
+		<br>
+		<b>Mouse Click</b> - Fire Small Bullet
+		<br>
+		<b>E</b> - Fire Big Bullet
+		<br>
+		<b>R</b> - Fire Biggest Bullet
+		<br>
+		<b>W</b> - While W Is Down, The Player Ship Will Not Move And You Can Shoot More Accurately If You Are Not Moving. (VERY Useful Button)
+		<br>
+		<b>NOTE</b> - Have Your Fingers On W, E, And R At All Times
+	</p>
+
+	<!-- 
+			INPUT PROCESSING OUTPUT CHART 
+		-->
+	<table>
+		<tr>
+			<td style="width:20%">Small Bullet (Mouse Click)</td>
+			<td><img src="images\bulletSmall.png"></td>
+			<td>
+				Requires 1 power minimum.
+				<br> Subtracts 1 from power.
+				<br> Can only kill the first enemy ship.
+			</td>
+
+		</tr>
+		<tr>
+			<td>Big Bullet (E)</td>
+			<td><img src="images\bulletBig.png"></td>
+			<td>
+				Requires 5 power minimum.
+				<br> Subtracts 5 from power.
+				<br> Can kill all first enemy and second enemy ships.
+			</td>
+		</tr>
+		<tr>
+			<td>Fire Biggest Bullet(R)</td>
+			<td style="width:20%"><img src="images\bulletBiggest.png"></td>
+			<td>
+				Requires 90 power minimum.
+				<br> Subtracts 90 from power.
+				<br> Can kill all enemy ships.</td>
+		</tr>
+		<tr>
+			<td>First Enemy</td>
+			<td><img src="images\enemyShipOne.png"></td>
+			<td>
+				Can be killed with any bullet.
+				<br> If it collides with your ship you loose 5 health.
+			</td>
+		</tr>
+		<tr>
+			<td>Second Enemy</td>
+			<td><img src="images\enemyShipTwo.png"></td>
+			<td>
+				Can be killed with Big Bullet and Biggest Bullet.
+				<br> If it collides with your ship you loose 10 health.
+			</td>
+
+		</tr>
+		<tr>
+			<td>Third Enemy</td>
+			<td><img src="images\enemyShipThree.png"></td>
+			<td>
+				Can be killed with Biggest Bullet only.
+				<br> If it collides with your ship you loose 30 health.
+				<br> This ship spawns only one at a time and it shoots bullets. Slowly, this ship begins to shoot faster and faster. It is best to kill it before it's too late
+			</td>
+		</tr>
+		<tr>
+			<td>Health Bonus</td>
+			<td><img src="images\health.png"></td>
+			<td>
+				Dropped randomly by destroyed enemies
+				<br> +5 health
+				<br> The stronger the enemy the higher chance of a health bonus spawning
+			</td>
+		</tr>
+	</table>
+	<h2><a href="../menu.html">PLAY SPACE DEFENDER</a></h2>
+</body>
+
+</html>

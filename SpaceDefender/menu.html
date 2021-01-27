@@ -1,0 +1,77 @@
+<html style="background-color: #222222">
+<title>
+	Space Defender
+</title>
+
+<script src="phaser.min.js"></script>
+<script src="phaser.js"></script>
+<script>
+	var game = new Phaser.Game(1800, 900, Phaser.AUTO, '', {
+		preload: preload,
+		create: create,
+		update: update
+	});
+
+	/*
+	            DECLARING MY VARIABLES
+	            USING TABS TO KEEP IT ORGANIZED AND NEAT
+	*/
+
+	// TEXT STYLE
+	var style = {
+		font: "32px Monospace",
+		fill: "#ff0044"
+	};
+	var style2 = {
+		font: "32px Monospace",
+		fill: "#33cc33"
+	};
+	var style3 = {
+		font: "64px Monospace",
+		fill: "#33cc33"
+	};
+
+	// BACKGROUND
+	var background;
+	// THEME
+	var theme;
+	// PLAY BUTTON
+	var play;
+	// CONTROLS TEX9
+	var controls;
+	// SHIP
+	var ship;
+
+	function preload() {
+		// PRELODING MY AUDIO
+		game.load.spritesheet('background', 'assets/gameBackground.png');
+		game.load.spritesheet('play', 'assets/play.png');
+		game.load.audio('theme', 'assets/theme.mp3');
+		game.load.spritesheet('ship', 'assets/shipMenuImage.png');
+	}
+
+	function create() {
+		//AUDIO AND BACKGROUND
+		game.add.sprite(0, 0, "background");
+		game.add.sprite(1500, 0, "background");
+		game.add.sprite(game.world.centerX - 85, game.world.centerY + 100, "ship");
+
+		theme = game.add.audio("theme", 0.5);
+		theme.loopFull();
+	}
+
+	function update() {
+		// PLAY BUTTON
+		play = game.add.button(game.world.centerX - 185, game.world.centerY - 300, "play", function() {
+			window.location.href = "template.html";
+		});
+		play.height = play.height * 1.3;
+		play.width = play.width * 1.3;
+		// CONTROLS
+		controls = game.add.text(game.world.centerX - 310, game.world.centerY - 150, "                               Controls\r\n                          W - Stay Still\r\n    CLICK MOUSE - Fire Small Bullet\r\n                     E - Fire Big Bullet\r\n                R - Fire BIggest Bullet", {
+			font: "40px Impact",
+			fill: "#33cc33",
+		});
+	}
+
+</script>

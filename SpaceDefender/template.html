@@ -1,0 +1,1098 @@
+<html style="background-color: #222222">
+<title>
+	Space Defender
+</title>
+
+<script src="phaser.min.js"></script>
+<script src="phaser.js"></script>
+<script>
+	var game = new Phaser.Game(1800, 900, Phaser.AUTO, '', {
+		preload: preload,
+		create: create,
+		update: update
+	});
+
+	/*
+	            DECLARING MY VARIABLES
+	            USING TABS TO KEEP IT ORGANIZED AND NEAT
+	*/
+
+	// TEXT STYLE
+	var style = {
+		font: "32px Monospace",
+		fill: "#ff0044"
+	};
+	var style2 = {
+		font: "32px Monospace",
+		fill: "#33cc33"
+	};
+	var style3 = {
+		font: "64px Monospace",
+		fill: "#33cc33"
+	};
+
+	// BACKGROUND
+	var background;
+	// SHIP RELATED
+	var ship;
+	// BULLET
+	var bullet;
+	var bulletBig;
+	var bulletBiggest;
+	//Ship Bullet Fire Speed
+	var fireRate = 75;
+	var nextFire = 0;
+	var fireRate2 = 200;
+	var nextFire2 = 0;
+	var fireRate3 = 250;
+	var nextFire3 = 0;
+	// SHIP POWER
+	var power = 0;
+	var powerCount;
+	// SHIP HEALTH
+	var health = 100;
+	var healthCount;
+	// SO THAT PLAYER SHIP EXPLOSION ONLY HAPPENS ONCE
+	var healthX = 1;
+	// EXPLOSION Small
+	var explosion;
+	var explode;
+	var boom;
+	// EXPLOSION Big
+	var explosionBig;
+	var explodeBig;
+	var boomBig;
+	//ENEMY SHIPS
+	//ENEMYSHIPONE GROUP
+	var enemies1;
+	//ENEMYSHIPONES
+	var enemyShipOne;
+	// ENEMYSHIPONE SPAWN RATE
+	var enemyOneSpawnRate = 400;
+	var nextSpawn = 0;
+	//ENEMYSHIPTWO GROUP
+	var enemies2;
+	//ENEMYSHIPTWOS
+	var enemyShipTwo;
+	// ENEMYSHIPTWO SPAWN RATE
+	var enemyTwoSpawnRate = 5000;
+	var nextSpawn2 = 0;
+	//ENEMYSHIPTHREE GROUP
+	var enemies3;
+	//ENEMYSHIPTHREES
+	var enemyShipThree;
+	// ENEMYSHIPTHREE SPAWN RATE
+	var enemyThreeSpawnRate = 150000; // 0 for a reason
+	var nextSpawn3 = 0;
+	// ENEMY BULLETS FIRE
+	var enemyThreeFireRate = fireRateControl;
+	var nextEnemyFire = 0;
+	var fireRateControl = 2500;
+	// SCORE
+	var score = 0;
+	var scoreCount;
+	//KILL COUNT
+	var killCount = 0;
+	var killCountText;
+	//WAVES (ONLY 3)
+	var waveCount;
+	//Score Board
+	var finalScores;
+	var hubButton;
+	var restartButton;
+	// AUDIO
+	var bulletSound;
+	var enemyDeathSound;
+	var bulletDeathSound;
+	// HEALTH BONUS METEOR-ISH THING
+	var healthBonusGroup;
+	var healthBonus;
+	//THEME
+	var theme
+	var powerLimit = 100;
+	/*
+	            PRELOAD FUNCTION
+	*/
+
+	function preload() {
+		// PRELODING MY SPRITES (DRAWN BY ME)
+		game.load.spritesheet('background', 'assets/gameBackground.png');
+
+		game.load.image('finalScores', 'assets/finalBoard.gif');
+		game.load.image('hubButton', 'assets/goToHub.png');
+		game.load.image('restartButton', 'assets/restart.png');
+
+		game.load.image('ship', 'assets/mainShip.png');
+
+		game.load.image('enemyShipOne', 'assets/enemyShipOne.png');
+		game.load.image('enemyShipTwo', 'assets/enemyShipTwo.png');
+		game.load.image('enemyShipThree', 'assets/enemyShipThree.png');
+
+
+		game.load.image('bullet', 'assets/bulletSmall.png');
+		game.load.image('bulletBig', 'assets/bulletBig.png');
+		game.load.image('bulletBiggest', 'assets/bulletBiggest.png');
+
+		game.load.image('enemyBullet', 'assets/bulletSmall.png');
+
+		game.load.image('healthBonus', 'assets/health.png');
+
+		// EXPLOSION GIF
+		game.load.spritesheet('explosion', 'assets/explosion.png', 75, 75, 9);
+		game.load.spritesheet('explosionBig', 'assets/explosion.png', 75, 75, 9);
+
+		// SOUNDS
+		game.load.audio('bulletSound', 'assets/bulletSound.mp3');
+		game.load.audio('enemyDeathSound', 'assets/enemyDeathSound.mp3');
+		game.load.audio('bulletDeathSound', 'assets/bulletDeathSound.mp3');
+		game.load.audio('theme', 'assets/theme.mp3');
+
+
+
+
+	}
+
+	/*
+	            CREATE FUNCTION
+	*/
+
+	function create() {
+		//AUDIO
+		theme = game.add.audio("theme", 0.3);w
+		theme.loopFull();
+		bulletSound = game.add.audio('bulletSound', 0.1);
+		enemyDeathSound = game.add.audio('enemyDeathSound', 0.1);
+		bulletSound = game.add.audio('bulletDeathSound', 0.1);
+		// SETTING GAME PHYSICS
+		game.physics.startSystem(Phaser.Physics.ARCADE);
+		// BACKGROUND SPRITE
+		background = game.add.sprite(0, 0, "background");
+		background = game.add.sprite(1400, 0, "background");
+		// SHIP BULLETS SMALL GROUP
+		bullets = game.add.group();
+		bullets.enableBody = true;
+		bullets.physicsBodyType = Phaser.Physics.ARCADE;
+		bullets.createMultiple(50, 'bullet');
+		bullets.setAll('checkWorldBounds', true);
+		bullets.setAll('outOfBoundsKill', true);
+		// SHIP BULLETS BIG GROUP
+		bulletsBig = game.add.group();
+		bulletsBig.enableBody = true;
+		bulletsBig.physicsBodyType = Phaser.Physics.ARCADE;
+		bulletsBig.createMultiple(50, 'bulletBig');
+		bulletsBig.setAll('checkWorldBounds', true);
+		bulletsBig.setAll('outOfBoundsKill', true);
+		// SHIP BULLETS BIG GROUP
+		bulletsBiggest = game.add.group();
+		bulletsBiggest.enableBody = true;
+		bulletsBiggest.physicsBodyType = Phaser.Physics.ARCADE;
+		bulletsBiggest.createMultiple(50, 'bulletBiggest');
+		bulletsBiggest.setAll('checkWorldBounds', true);
+		bulletsBiggest.setAll('outOfBoundsKill', true);
+		// SHIP POWER COUNT (TEXT DISPLAY
+		powerCount = game.add.text(10, 10, "Power: " + power, style);
+		// SHIP HEALTH COUNT (TEXT DISPLAY
+		healthCount = game.add.text(10, 50, "Health: " + health, style);
+		// SCORE COUNT
+		scoreCount = game.add.text(10, 730, "Score: " + score, style2);
+		// KILL COUNT
+		killCountText = game.add.text(10, 780, "Kill Count: " + killCount, style2);
+		// WAVE COUNT
+		waveCount = game.add.text(10, 830, "Wave 1", style3);
+		// ADDING MAIN SHIP (PLAYER'S SHIP)
+		ship = game.add.sprite(400, 300, "ship");
+		// ENABLE ARCADE PHYSICS FOR PLAYER SHIP
+		game.physics.enable(ship, Phaser.Physics.ARCADE);
+		// PLAYER SHIP ANCHOR
+		ship.anchor.setTo(0.55, 0.5);
+		// Rotation
+		ship.body.allowRotation = false;
+		ship.visible = true;
+		// ENEMY SHIPS
+		// ENEMY SHIP ONE GROUP
+		enemies1 = game.add.group();
+		game.physics.enable(enemies1, Phaser.Physics.ARCADE);
+		// ENEMY SHIP TWO GROUP
+		enemies2 = game.add.group();
+		game.physics.enable(enemies2, Phaser.Physics.ARCADE);
+		// ENEMY SHIP THREE GROUP
+		enemies3 = game.add.group();
+		game.physics.enable(enemies3, Phaser.Physics.ARCADE);
+		//ENEMY SHIP BULLET
+		enemyBullets = game.add.group();
+		enemyBullets.enableBody = true;
+		enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+		enemyBullets.createMultiple(50, 'enemyBullets');
+		enemyBullets.setAll('checkWorldBounds', true);
+		enemyBullets.setAll('outOfBoundsKill', true);
+		//Health Bonus
+		healthBonusGroup = game.add.group();
+		healthBonusGroup.enableBody = true;
+		healthBonusGroup.physicsBodyType = Phaser.Physics.ARCADE;
+	}
+	/*
+	            MY FUNCTIONS
+	*/
+	/*
+	        PLAYER SHIP
+	*/
+	/*
+	    MOVEMENT
+	*/
+	function playerShipMovement() {
+		// SHIP ROTATION AND MOVEMENT
+		ship.rotation = game.physics.arcade.moveToPointer(ship, 100, game.input.activePointer, 500);
+	}
+	/*
+	    BULLET ONE FIRE
+	*/
+	function fire() {
+		if (game.time.now > nextFire && bullets.countDead() > 0 && power >= 1.5 && ship.visible == true) {
+			// Sound
+			bulletSound.play();
+			//  Subtract Power
+			power = power - 1;
+			//  FIRE RATE
+			nextFire = game.time.now + fireRate;
+			bullet = bullets.getFirstDead();
+			bullet.reset(ship.x - 0, ship.y - 0);
+			// MOVES BULLET TOWARDS MOUSE AND SETS SPEED
+			game.physics.arcade.moveToPointer(bullet, 1300);
+
+
+		}
+	}
+	/*
+	    BULLET TWO FIRE
+	*/
+	function fire2() {
+		if (game.time.now > nextFire2 && bulletsBig.countDead() > 0 && power >= 10 && ship.visible == true) {
+			// Sound
+			bulletSound.play();
+			//  Subtract Power
+			power = power - 5;
+			//  FIRE RATE
+			nextFire2 = game.time.now + fireRate2;
+			bulletBig = bulletsBig.getFirstDead();
+			// THIS LINE DOES NOT WORK... FROM WHAT I CAN TELL
+			bulletBig.reset(ship.x - 0, ship.y - 0);
+			// MOVES BULLET TOWARDS MOUSE AND SETS SPEED
+			game.physics.arcade.moveToPointer(bulletBig, 1600);
+		}
+	}
+	/*
+	    BULLET THREE FIRE
+	*/
+	function fire3() {
+		if (game.time.now > nextFire3 && bulletsBiggest.countDead() > 0 && power >= 90 && ship.visible == true) {
+			// Sound
+			bulletSound.play();
+			//  Subtract Power
+			power = power - 90;
+			//  FIRE RATE
+			nextFire3 = game.time.now + fireRate3;
+			bulletBiggest = bulletsBiggest.getFirstDead();
+			// THIS LINE DOES NOT WORK... FROM WHAT I CAN TELL
+			bulletBiggest.reset(ship.x - 0, ship.y - 0);
+			// MOVES BULLET TOWARDS MOUSE AND SETS SPEED
+			game.physics.arcade.moveToPointer(bulletBiggest, 3000);
+		}
+	}
+	/*
+	        ENEMY SHIPS
+	*/
+	/*
+	    CREATING ENEMY SHIP ONE
+	*/
+	function createEnemyOne() {
+		if (game.time.now >= nextSpawn) {
+			nextSpawn = game.time.now + enemyOneSpawnRate;
+			// ENEMY ONE SPRITE CREATION 
+
+			enemyShipOne = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipOne");
+			// CHECKING LOCATION
+			while (game.physics.arcade.distanceBetween(enemyShipOne, ship) < 200) {
+				enemyShipOne.destroy()
+				enemyShipOne = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipOne");
+				/*if(enemyShipOne!=null)
+				{
+    				enemyShipOne.body.x=game.world.randomX;
+    				enemyShipOne.body.y=game.world.randomY;
+    			}*/
+			}
+			// ENABLING ARCATE PHYSICS
+			game.physics.arcade.enable(enemyShipOne);
+			// ADDING ENEMYSHIPONE TO ENEMIES1 GROUP
+			enemies1.add(enemyShipOne);
+			// SETTING ANCHOR
+			enemyShipOne.anchor.setTo(0.5, 0.5);
+		}
+	}
+
+	function followShip() {
+
+		enemies1.forEach(function(enemyShipOne) {
+			game.physics.arcade.moveToObject(enemyShipOne, ship, 50)
+		});
+		//enemies1.rotation = game.physics.arcade.angleToObject(enemyShipOne);
+	}
+	/*
+	        CREATING ENEMY SHIP TWO
+	*/
+	function createEnemyTwo() {
+		if (game.time.now >= nextSpawn2) {
+			nextSpawn2 = game.time.now + enemyTwoSpawnRate;
+			// ENEMY ONE SPRITE CREATION 
+			enemyShipTwo = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipTwo");
+			// CHECKING LOCATION
+			while (game.physics.arcade.distanceBetween(enemyShipTwo, ship) < 300) {
+				enemyShipTwo.destroy()
+				enemyShipTwo = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipTwo");
+				/*if(enemyShipOne!=null)
+				{
+    				enemyShipOne.body.x=game.world.randomX;
+    				enemyShipOne.body.y=game.world.randomY;
+    			}*/
+			}
+			// ENABLING ARCATE PHYSICS
+			game.physics.arcade.enable(enemyShipTwo);
+			// ADDING ENEMYSHIPONE TO ENEMIES2 GROUP
+			enemies2.add(enemyShipTwo);
+			// SETTING ANCHOR
+			enemyShipOne.anchor.setTo(0.7, 0.5);
+		}
+	}
+
+	function followShip2() {
+		enemies2.forEach(function(enemyShipTwo) {
+			game.physics.arcade.moveToObject(enemyShipTwo, ship, 20)
+		});
+	}
+
+	/*
+	        CREATING ENEMY SHIP THREE
+	*/
+	function createEnemyThree() {
+		//if (game.time.now >= nextSpawn3) {
+
+		// ENEMY ONE SPRITE CREATION 
+		enemyShipThree = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipThree");
+		// CHECKING LOCATION
+		while (game.physics.arcade.distanceBetween(enemyShipThree, ship) < 500) {
+			enemyShipThree.destroy()
+			enemyShipThree = game.add.sprite(game.world.randomX, game.world.randomY, "enemyShipThree");
+			/*if(enemyShipOne!=null)
+				{
+    				enemyShipOne.body.x=game.world.randomX;
+    				enemyShipOne.body.y=game.world.randomY;
+    			}*/
+		}
+		// ENABLING ARCADE PHYSICS
+		game.physics.arcade.enable(enemyShipThree);
+		// ADDING ENEMYSHIPONE TO ENEMIES1 GROUP
+		enemies3.add(enemyShipThree);
+		// SETTING ANCHOR
+		enemyShipThree.anchor.setTo(0.5, 0.5);
+		//}
+	}
+	var enemyBullets;
+	var enemyBullet;
+
+	function enemyFire() {
+		if (game.time.now > nextEnemyFire) {
+			// Sound
+			bulletSound.play();
+			//  FIRE RATE
+			nextEnemyFire = game.time.now + enemyThreeFireRate;
+			if (enemyThreeFireRate >= 700) {
+				enemyThreeFireRate = enemyThreeFireRate - 50;
+			} // SPEEDING UP ENEMY FIRE RATE
+			enemyBullet = game.add.sprite(enemyShipThree.x, enemyShipThree.y, "bullet")
+			game.physics.arcade.enable(enemyBullet);
+			enemyBullets.add(enemyBullet);
+			//move to ship
+			game.physics.arcade.moveToPointer(enemyBullet, 300);
+			//check bullet for out of bounds
+			enemyBullets.setAll('checkWorldBounds', true);
+			enemyBullets.setAll('outOfBoundsKill', true);
+		}
+	}
+
+	function followShip3() {
+
+		enemies3.forEach(function(enemyShipThree) {
+			game.physics.arcade.moveToObject(enemyShipThree, ship, 5)
+		});
+
+	}
+	/*
+	            UPDATE FUNCTION
+	*/
+	function update() {
+		//Ship Movement
+		playerShipMovement()
+			//Ship Bullet Small Fire + Creating new small bullet
+		if (game.input.activePointer.isDown) {
+			fire();
+			bullets.createMultiple(1, 'bullet');
+		}
+		//Ship BulletBig Fire + Creating new big bullet
+		if (game.input.keyboard.addKey(Phaser.Keyboard.E).isDown) {
+			fire2();
+			bulletsBig.createMultiple(1, 'bulletBig');
+		}
+		//Ship BulletBiggest Fire + Creating new biggest bullet
+		if (game.input.keyboard.addKey(Phaser.Keyboard.R).isDown) {
+			fire3();
+			bulletsBiggest.createMultiple(1, 'bulletBiggest');
+		}
+		// SHIP FREEZE
+		if (game.input.keyboard.addKey(Phaser.Keyboard.W).isDown) {
+			ship.body.velocity.x = 0;
+			ship.body.velocity.y = 0;
+		}
+		// SHIP HEALTH AT 0
+		if (0 >= health && healthX > 0) {
+			healthX = 0;
+			explodeShip();
+		}
+		//Ship Power Count Text Display 
+		powerCount.setText("Power: " + Math.round(power));
+		//Ship Power Cap
+		if (power < powerLimit) {
+			power = power + 0.14;
+		}
+		//Ship Health Count Text Display 
+		healthCount.setText("Health: " + Math.round(health));
+		//Ship Score Text Display 
+		scoreCount.setText("Score: " + Math.round(score));
+		//Kill Count Text Display 
+		killCountText.setText("Kill Count: " + Math.round(killCount));
+		// ENEMY SHIP ONE SPAWN
+		createEnemyOne();
+		// ENEMY SHIP TWO SPAWN
+		if (killCount >= 100) {
+			createEnemyTwo();
+		}
+		// ENEMY SHIP THREE SPAWN AND SHOOTING
+		if ((0 >= enemies3.countLiving()) && (killCount >= 250)) {
+			enemyThreeFireRate = fireRateControl;
+			setTimeout(createEnemyThree(), 5000);
+
+		}
+		if (enemies3.countLiving() == 1 && ship.visible == true) {
+			enemyFire();
+		}
+		// ENEMY SHIP FOLLOW SHIP
+		followShip();
+		followShip2();
+		followShip3();
+		// ENEMY SHIP ONE
+		// ENEMY SHIP DEATH FROM SHIP
+		game.physics.arcade.collide(ship, enemies1, killedWithShip1, healthLoss1, this);
+		// ENEMY SHIP DEATH FROM BULLET
+		game.physics.arcade.collide(bullets, enemies1, killedWithBullet1, extra1, this);
+		// ENEMY SHIP COLISSION WITH BIG BULLET
+		game.physics.arcade.collide(bulletsBig, enemies1, killedWithBigBullet1, extra2, this);
+		// ENEMY SHIP COLISSION WITH BIGGEST BULLET
+		game.physics.arcade.collide(bulletsBiggest, enemies1, killedWithBiggestBullet1, extra9, this);
+		// ENEMY SHIP TWO
+		if ((killCount >= powerLimit) && (249 >= killCount)) {
+			waveCount.setStyle({
+				font: "64px Monospace",
+				fill: "#F1C40F"
+			});
+			waveCount.setText("Wave 2");
+			powerLimit = 120;
+		}
+		// ENEMY SHIP DEATH FROM SHIP
+		game.physics.arcade.collide(ship, enemies2, killedWithShip2, healthLoss2, this);
+		// SMALL BULLET DEAT FROM ENEMY
+		game.physics.arcade.collide(enemies2, bullets, killedWithBullet2, extra3, this);
+		// ENEMY SHIP COLISSION WITH BIG BULLET
+		game.physics.arcade.collide(bulletsBig, enemies2, killedWithBigBullet2, extra4, this);
+		// ENEMY SHIP COLISSION WITH BIGGEST BULLET
+		game.physics.arcade.collide(bulletsBiggest, enemies2, killedWithBiggestBullet2, extra8, this);
+		//ENEMY SHIP THREE
+		if ((killCount >= 250) && (349 >= killCount)) {
+			waveCount.setStyle({
+				font: "64px Monospace",
+				fill: "#F39C12"
+			});
+			waveCount.setText("Wave 3");
+			powerLimit = 150;
+		}
+		// ENEMY SHIP DEATH FROM SHIP
+		game.physics.arcade.collide(ship, enemies3, killedWithShip3, healthLoss3, this);
+		// SMALL BULLET DEAT FROM ENEMY
+		game.physics.arcade.collide(bullets, enemies3, killedWithBullet3, extra5, this);
+		// BIG BULLET DEAT FROM ENEMY
+		game.physics.arcade.collide(bulletsBig, enemies3, killedWithBigBullet3, extra6, this);
+		// ENEMY SHIP COLISSION WITH BIG BULLET
+		game.physics.arcade.collide(bulletsBiggest, enemies3, killedWithBiggestBullet3, extra7, this);
+		//PLAYER COLISSION WITH ENEMY BULLET
+		game.physics.arcade.collide(enemyBullets, ship, bulletHittingShip, extra10, this);
+
+		game.physics.arcade.collide(enemyBullets, bullets, bulletVsBullet, sfx, this);
+		game.physics.arcade.collide(enemyBullets, bulletsBig, bulletVsBulletBig, sfx2, this);
+		game.physics.arcade.collide(enemyBullets, bulletsBiggest, bulletVsBulletBiggest, sfx3, this);
+
+		// IF SHIP GOES ON HEALTH BONUS
+		game.physics.arcade.collide(healthBonusGroup, ship, addHealth, extra11, this);
+
+		//WAVE 4
+		if ((killCount >= 350) && (549 >= killCount)) {
+			waveCount.setStyle({
+				font: "64px Monospace",
+				fill: "#F39C12"
+			});
+			waveCount.setText("Wave 4");
+			enemyOneSpawnRate = 400;
+			powerLimit = 200;
+
+		}
+		if ((killCount >= 550) && (799 >= killCount)) {
+			waveCount.setStyle({
+				font: "64px Monospace",
+				fill: "#F39C12"
+			});
+			waveCount.setText("Wave 5");
+			enemyTwoSpawnRate = 2500;
+			powerLimit = 250;
+		}
+		if ((killCount >= 800)) {
+			waveCount.setStyle({
+				font: "64px Monospace",
+				fill: "#F39C12"
+			});
+			waveCount.setText("Wave 5");
+
+			fireRateControl = 2000
+			powerLimit = 300;
+		}
+	}
+
+	function extra11() {
+		health = health + 5
+
+	}
+
+	function addHealth(ship, bonus) {
+		var healthGain1 = game.add.text(ship.x - 20, ship.y - 20, "Health +5", style);
+		//HEALTH GAIN TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(healthGain1);
+			game.add.tween(healthGain1).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+
+		explosion = game.add.sprite(bonus.x, bonus.y, 'explosion')
+		explode1();
+		bonus.destroy()
+
+	}
+
+	function sfx() {
+		//for any extra code
+
+	}
+
+	function bulletVsBullet(bullet1, bullet2) {
+		explosionBig = game.add.sprite(bullet1.x, bullet1.y, 'explosionBig');
+		explosionBig.width = 150
+		explosionBig.height = 150
+		explode2();
+		bullet1.x = -99999;
+
+
+	}
+
+	function sfx2() {
+		//for any extra code
+		;
+	}
+
+	function bulletVsBulletBig(bullet1, bullet2) {
+		explosionBig = game.add.sprite(bullet1.x, bullet1.y, 'explosionBig');
+		explosionBig.width = 150
+		explosionBig.height = 150
+		explode2()
+		bullet1.x = -99999;
+
+	}
+
+	function sfx3() {
+		//for any extra code
+
+	}
+
+	function bulletVsBulletBiggest(bullet1, bullet2) {
+		explosionBig = game.add.sprite(bullet1.x, bullet1.y, 'explosionBig');
+		explosionBig.width = 150
+		explosionBig.height = 150
+		explode2();
+		bullet1.x = -99999;
+
+	}
+
+	/*
+	        KILLED WITH SHIP (ALL SHIP STUFF) nothing here
+	*/
+	/*
+	        KILLED WITH SHIP (ENEMY SHIP ONE SPECIFIC STUFF)
+	*/
+	function healthLoss1(player, veg) {
+		// SUBTRACTING HEALTH
+		health = health - 5;
+		killCount = killCount + 1;
+		// TEXT DISPLAYING HEALTH LOSS
+		var healthLoss1 = game.add.text(ship.x - 20, ship.y - 20, "-5", style);
+		//HEALTH LOSS TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(healthLoss1);
+			game.add.tween(healthLoss1).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+	}
+
+	function killedWithShip1(ship, enemyShip) {
+		// EXPLOSION ANIIMATION
+		explosion = game.add.sprite(enemyShip.x - 30, enemyShip.y - 30, "explosion");
+		explode1()
+			// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+	}
+	/*
+	        KILLED WITH BULLET
+	*/
+	function extra1() {
+		score = score + 10;
+		killCount = killCount + 1;
+	}
+
+	function killedWithBullet1(theBullet, enemyShip) {
+		//Random number between 100 and 1... If it is 1 health bonus will spawn
+		var randomHealthNumber = Math.floor((Math.random() * 200) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+		// EXPLOSION ANIIMATION
+		explosion = game.add.sprite(enemyShip.x - 30, enemyShip.y - 30, "explosion");
+		enemyShip.body.x = -100;
+		explode1()
+			// TEXT DISPLAYING SCORE GAIN
+		var scoreGain1 = game.add.text(enemyShip.x - 20, enemyShip.y - 20, "+10", style2);
+		//SCORE GAIN TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(scoreGain1);
+			game.add.tween(scoreGain1).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+		// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+	}
+	/*
+	        KILLED WITH BIG BULLET
+	*/
+	function extra2() {
+		score = score + 10;
+		killCount = killCount + 1;
+
+	}
+
+	function killedWithBigBullet1(theBigBullet, enemyShip) {
+		var randomHealthNumber = Math.floor((Math.random() * 200) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 60, enemyShip.y - 60, 'explosionBig');
+		explosionBig.width = explosionBig.width * 3.5;
+		explosionBig.height = explosionBig.height * 3.5;
+		enemyShip.body.x = -100;
+		explode2();
+		// TEXT DISPLAYING SCORE GAIN
+		var scoreGain1 = game.add.text(enemyShip.x - 20, enemyShip.y - 20, "+10", style2);
+		//SCORE GAIN TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(scoreGain1);
+			game.add.tween(scoreGain1).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+		// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+
+	}
+	//KILLING SHIP WITH THE BIGGEST BULLET
+	function extra9() {
+		score = score + 10;
+		killCount = killCount + 1;
+	}
+
+	function killedWithBiggestBullet1(theBiggestBullet, enemyShip) {
+		var randomHealthNumber = Math.floor((Math.random() * 10) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 150, enemyShip.y - 150, 'explosionBig');
+		explosionBig.width = explosionBig.width * 4.2;
+		explosionBig.height = explosionBig.height * 4.2;
+		//theBiggestBullet.body.x = -100;
+
+		//EXPLODE
+		explode2();
+		enemyShip.destroy()
+	}
+	/*
+	        KILLED WITH SHIP (ENEMY SHIP TWO SPECIFIC STUFF)
+
+	*/
+	function healthLoss2(player, veg) {
+		// SUBTRACTING HEALTH
+		health = health - 10;
+		killCount = killCount + 1;
+		// TEXT DISPLAYING HEALTH LOSS
+		var healthLoss2 = game.add.text(ship.x - 20, ship.y - 20, "-10", style);
+		//HEALTH LOSS TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(healthLoss2);
+			game.add.tween(healthLoss2).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+	}
+
+	function killedWithShip2(ship, enemyShip) {
+		// EXPLOSION ANIIMATION
+		explosion = game.add.sprite(enemyShip.x - 30, enemyShip.y - 30, "explosion");
+		explode1()
+			// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+	}
+	/*
+	        KILLED WITH BULLET
+	*/
+	function extra3() {}
+
+	function killedWithBullet2(enemyShip, theBullet) {
+		// EXPLOSION ANIIMATION
+		explosion = game.add.sprite(enemyShip.x - 10, enemyShip.y - 10, "explosion");
+		explosion.width = explosion.width * 2;
+		explosion.height = explosion.height * 2;
+		theBullet.body.x = -100
+		explode1()
+	}
+	/*
+	        KILLED WITH BIG BULLET
+	*/
+	function extra4() {
+		score = score + 100;
+		killCount = killCount + 1;
+	}
+
+	function killedWithBigBullet2(theBigBullet, enemyShip) {
+		var randomHealthNumber = Math.floor((Math.random() * 100) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 60, enemyShip.y - 60, 'explosionBig');
+		explosionBig.width = explosionBig.width * 3;
+		explosionBig.height = explosionBig.height * 3;
+		enemyShip.body.x = -100;
+		// TEXT DISPLAYING SCORE GAIN
+		var scoreGain2 = game.add.text(enemyShip.x - 20, enemyShip.y - 20, "+100", style2);
+		//SCORE GAIN TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(scoreGain2);
+			game.add.tween(scoreGain2).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+		//EXPLODE
+		explode2();
+		// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+	}
+
+	//KILLING SHIP WITH THE BIGGEST BULLET
+	function extra8() {
+		score = score + 100;
+		killCount = killCount + 1;
+	}
+
+	function killedWithBiggestBullet2(theBiggestBullet, enemyShip) {
+		var randomHealthNumber = Math.floor((Math.random() * 10) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 150, enemyShip.y - 150, 'explosionBig');
+		explosionBig.width = explosionBig.width * 4.2;
+		explosionBig.height = explosionBig.height * 4.2;
+		//theBiggestBullet.body.x = -100;
+
+		//EXPLODE
+		explode2();
+		enemyShip.destroy()
+	}
+
+	/*
+	    ENEMY SHIP 3 SPECIFIC STUFF 
+	*/
+	// KILLED WITH SHIP
+	function healthLoss3(player, veg) {
+		// SUBTRACTING HEALTH
+		health = health - 30;
+		killCount = killCount + 1;
+		// TEXT DISPLAYING HEALTH LOSS
+		var healthLoss3 = game.add.text(ship.x - 20, ship.y - 20, "-30", style);
+		//HEALTH LOSS TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(healthLoss3);
+			game.add.tween(healthLoss3).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+	}
+
+	function killedWithShip3(ship, enemyShip) {
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 75, enemyShip.y - 75, "explosion");
+		explosionBig.width = explosionBig.width * 2.5;
+		explosionBig.height = explosionBig.height * 2.5;
+		explode2()
+			// ENEMY SHIP DISTRUCTION
+		enemyShip.destroy();
+	}
+	// KILLING THE SMALL BULLET
+	function extra5() {}
+
+	function killedWithBullet3(theBullet, enemyShip) {
+		// EXPLOSION ANIIMATION
+		explosion = game.add.sprite(enemyShip.x - 55, enemyShip.y - 55, "explosion");
+		explosion.width = explosion.width * 2.5;
+		explosion.height = explosion.height * 2.5;
+		theBullet.body.x = -100
+		explode1()
+	}
+	//KILLING THE BIG BULLET
+	function extra6() {
+		score = score + 0;
+		killCount = killCount + 0;
+	}
+
+	function killedWithBigBullet3(theBigBullet, enemyShip) {
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 120, enemyShip.y - 120, 'explosionBig');
+		explosionBig.width = explosionBig.width * 3;
+		explosionBig.height = explosionBig.height * 3;
+		theBigBullet.body.x = -100;
+
+		//EXPLODE
+		explode2();
+	}
+	//KILLING SHIP WITH THE BIGGEST BULLET
+	function extra7() {
+		score = score + 500;
+		killCount = killCount + 1;
+	}
+
+	function killedWithBiggestBullet3(theBiggestBullet, enemyShip) {
+		var randomHealthNumber = Math.floor((Math.random() * 3) + 1);
+		if (randomHealthNumber == 1) {
+			healthBonus = game.add.sprite(enemyShip.x, enemyShip.y, "healthBonus")
+			game.physics.arcade.enable(healthBonus);
+			healthBonusGroup.add(healthBonus);
+
+		}
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(enemyShip.x - 150, enemyShip.y - 150, 'explosionBig');
+		explosionBig.width = explosionBig.width * 4.2;
+		explosionBig.height = explosionBig.height * 4.2;
+		//theBiggestBullet.body.x = -100;
+
+		//EXPLODE
+		explode2();
+		enemyShip.destroy()
+	}
+
+	//KILLING SHIP WITH THE BIGGEST BULLET
+	function extra10() {
+		health = health - 10;
+		var healthLossFinal = game.add.text(ship.x - 20, ship.y - 20, "-10", style);
+		//HEALTH LOSS TEXT DISPLAY FADING
+		game.time.events.add(10, function() {
+			game.add.tween(healthLossFinal);
+			game.add.tween(healthLossFinal).to({
+				alpha: 0
+			}, 1500, Phaser.Easing.Linear.None, true);
+		}, this);
+	}
+
+	function bulletHittingShip(theShip, theBullet) {
+		// EXPLOSION ANIIMATION
+		explosionBig = game.add.sprite(theShip.x - 150, theShip.y - 150, 'explosionBig');
+		explosionBig.width = explosionBig.width * 4.2;
+		explosionBig.height = explosionBig.height * 4.2;
+		theBullet.destroy()
+
+		//EXPLODE
+		explode2();
+	}
+
+	/*
+	        EXPLOSION
+	*/
+
+	function explode1() {
+		// EXPLOSION
+		explode = explosion.animations.add("smallExplosion");
+		explosion.animations.play("smallExplosion", 20, false, true);
+		enemyDeathSound.play();
+	}
+
+	function explode2() {
+		// EXPLOSION
+		explodeBig = explosionBig.animations.add('bigExplosion');
+		explosionBig.animations.play('bigExplosion', 20, false, true);
+		enemyDeathSound.play();
+	}
+	// END OF MAIN PLAYER SHIP (DEATH EXPLOSION FUNCTION)
+	function explodeShip() {
+
+		for (i = 0; i < 10; i++) {
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+				enemyDeathSound.play();
+			}, 5);
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+				enemyDeathSound.play();
+			}, 50);
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+			}, 100);
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+				enemyDeathSound.play();
+			}, 200);
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+			}, 250);
+			setTimeout(function() {
+				explosion = game.add.sprite(game.world.randomX, game.world.randomY - 30, "explosion");
+				explosion.width = 200;
+				explosion.height = 200;
+				explode = explosion.animations.add("boom");
+				explosion.animations.play("boom", 20, false, true);
+				enemyDeathSound.play();
+				theEnd()
+			}, 300);
+
+		}
+		//EXPLOSION ON SHIP
+		var explosion2 = game.add.sprite(ship.x - 20, ship.y - 20, "explosion");
+		var explosion3 = game.add.sprite(ship.x - 30, ship.y - 0, "explosion");
+		var explosion4 = game.add.sprite(ship.x - 0, ship.y - 30, "explosion");
+		var explosion5 = game.add.sprite(ship.x - 10, ship.y - 10, "explosion");
+		var explosion6 = game.add.sprite(ship.x - 0, ship.y - 0, "explosion");
+		var explode2 = explosion2.animations.add("boom2");
+		var explode3 = explosion3.animations.add("boom3");
+		var explode4 = explosion4.animations.add("boom4");
+		var explode5 = explosion5.animations.add("boom5");
+		var explode6 = explosion6.animations.add("boom6");
+		explosion2.animations.play("boom2", 20, false, true);
+		explosion3.animations.play("boom3", 20, false, true);
+		explosion4.animations.play("boom4", 20, false, true);
+		explosion5.animations.play("boom5", 20, false, true);
+		explosion6.animations.play("boom6", 20, false, true);
+
+		// STOPPING THINGS
+		ship.visible = false;
+		bullets.visible = false;
+		bulletsBig.visible = false;
+		bulletsBiggest.visible = false;
+		ship.kill();
+		//ENEMIES
+		enemies1.destroy();
+		enemies2.destroy();
+		enemies3.destroy();
+		enemyThreeFireRate = 999999999;
+
+		killCountText.destroy();
+		waveCount.destroy();
+		healthCount.destroy();
+		scoreCount.destroy();
+		powerCount.destroy();
+		enemyBullets.destroy();
+
+
+		// Function called for score menu and all that stuff
+		theEnd()
+	}
+
+	function theEnd() {
+		finalScores = game.add.sprite(500, 150, "finalScores");
+		var hubButton = game.add.button(650, 600, "hubButton", function() {
+			window.location.href = "../index.html";
+		});
+		var restartButton = game.add.button(1000, 600, "restartButton", function() {
+			//window.location.href = "spaceDefendersWebsite/index.html";
+			location.replace(location)
+				//self.location.assign(location));
+		});
+		var theEndScore = game.add.text(590, 210, "YOUR FINAL SCORE\r\n" + score, {
+			font: "80px Impact",
+			fill: "#33cc33"
+		});
+		var theEndKilLCount = game.add.text(590, 400, "YOUR KILLS\r\n" + killCount, {
+			font: "80px Impact",
+			fill: "#33cc33"
+		});
+	}
+
+</script>
